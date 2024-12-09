@@ -1,5 +1,6 @@
 Palaist node.js -> cd "C:\rental_platfrom_a"; node server.js
 Palaist npm: -> cd "C:\rental_platfrom_a\rental-platform-frontend"; npm start
 
-
-PIeejamie datumi 2024-12-01, 2024-12-02,2024-12-03
+git add .
+git commit -m "Commit message"
+git push
