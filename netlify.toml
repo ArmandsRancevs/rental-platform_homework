@@ -1,28 +1,30 @@
+# netlify.toml
+
 [build]
-  base    = "rental-platform-frontend"
-  command = "npm install && npm run build"
-  publish = "build"
+  # run both installs and build the React app
+  command = "npm install && npm install --prefix rental-platform-frontend && npm run build --prefix rental-platform-frontend"
+  # where the React build will live
+  publish = "rental-platform-frontend/build"
 
 [functions]
-  # this is where your single api.js “wrapper” lives
+  # top‐level directory we just created
   directory = "netlify/functions"
 
-# proxy /admin/* into your one `api.js` function, preserving the /admin prefix
+# serverless proxy for your Express routes:
 [[redirects]]
-  from   = "/admin/*"
-  to     = "/.netlify/functions/api/admin/:splat"
-  status = 200
-  force  = true
+  from     = "/admin/*"
+  to       = "/.netlify/functions/api/admin/:splat"
+  status   = 200
+  force    = true
 
-# same for /api/*
 [[redirects]]
-  from   = "/api/*"
-  to     = "/.netlify/functions/api/api/:splat"
-  status = 200
-  force  = true
+  from     = "/api/*"
+  to       = "/.netlify/functions/api/api/:splat"
+  status   = 200
+  force    = true
 
-# everything else → your React app
+# everything else → client-side router
 [[redirects]]
-  from   = "/*"
-  to     = "/index.html"
-  status = 200
+  from     = "/*"
+  to       = "/index.html"
+  status   = 200
