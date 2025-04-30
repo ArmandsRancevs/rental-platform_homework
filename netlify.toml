@@ -1,31 +1,28 @@
 # netlify.toml
 [build]
-  # where your package.json / React app live
-  base    = "rental-platform-frontend"
-  # how to build your React app
-  command = "npm install && npm run build"
-  # the folder (relative to `base`) that Netlify will publish
-  publish = "build"
+  # run both installs and build the React app
+  command = "npm install && npm install --prefix rental-platform-frontend && npm run build --prefix rental-platform-frontend"
+  # where the React build will live
+  publish = "rental-platform-frontend/build"
 
 [functions]
-  # where your lambda wrappers + server.js live
-  directory = "rental-platform-frontend/netlify/functions"
+  # top‐level directory we just created
+  directory = "netlify/functions"
 
-# proxy any /admin/* request into your Express admin router
+# serverless proxy for your Express routes:
 [[redirects]]
   from     = "/admin/*"
   to       = "/.netlify/functions/api/admin/:splat"
   status   = 200
   force    = true
 
-# proxy any /api/* request into your Express API router
 [[redirects]]
   from     = "/api/*"
   to       = "/.netlify/functions/api/api/:splat"
   status   = 200
   force    = true
 
-# everything else (client‐side routes) back to index.html
+# everything else → client-side router
 [[redirects]]
   from     = "/*"
   to       = "/index.html"
