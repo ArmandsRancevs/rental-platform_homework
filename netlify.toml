@@ -1,19 +1,17 @@
-# netlify.toml at repo root
 [build]
-  base    = "."                                  # ← build from repo root
-  command = "npm install --prefix rental-platform-frontend && npm run build --prefix rental-platform-frontend"
-  publish = "rental-platform-frontend/build"
+  base    = "rental-platform-frontend"
+  command = "npm install && npm run build"
+  publish = "build"
 
 [functions]
-  # point to where your bundled functions live
   directory = "rental-platform-frontend/netlify/functions"
-
-[[redirects]]
-  from   = "/api/*"
-  to     = "/.netlify/functions/api/api/:splat"
-  status = 200
 
 [[redirects]]
   from   = "/admin/*"
   to     = "/.netlify/functions/api/admin/:splat"
+  status = 200
+
+[[redirects]]
+  from   = "/api/*"
+  to     = "/.netlify/functions/api/api/:splat"
   status = 200
