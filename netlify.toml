@@ -1,3 +1,5 @@
+# netlify.toml
+
 [build]
   base    = "rental-platform-frontend"
   command = "npm install && npm run build"
@@ -6,17 +8,21 @@
 [functions]
   directory = "rental-platform-frontend/netlify/functions"
 
+# 1 Proxy all /admin/* calls into your Express function
 [[redirects]]
   from   = "/admin/*"
   to     = "/.netlify/functions/api/admin/:splat"
   status = 200
 
+# 2 Proxy all /api/* calls into your Express function
 [[redirects]]
   from   = "/api/*"
   to     = "/.netlify/functions/api/api/:splat"
   status = 200
 
+# 3 Only GET requests for anything else fall back to index.html
 [[redirects]]
-  from   = "/*"
-  to     = "/index.html"
-  status = 200
+  from    = "/*"
+  to      = "/index.html"
+  status  = 200
+  methods = ["GET"]
