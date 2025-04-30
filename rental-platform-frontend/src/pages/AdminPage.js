@@ -1,5 +1,4 @@
 // src/pages/AdminPage.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
@@ -8,17 +7,8 @@ import { API_BASE } from '../config';
 
 export default function AdminPage() {
   const [listings, setListings] = useState([]);
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    location: '',
-    pricePerNight: ''
-  });
-  const [period, setPeriod] = useState({
-    startDate: null,
-    endDate: null,
-    quantity: 1
-  });
+  const [form, setForm] = useState({ title: '', description: '', location: '', pricePerNight: '' });
+  const [period, setPeriod] = useState({ startDate: null, endDate: null, quantity: 1 });
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -27,7 +17,11 @@ export default function AdminPage() {
 
   async function fetchListings() {
     try {
-      const { data } = await axios.get(`${API_BASE}/admin/listings`);
+      const res = await axios.get(`${API_BASE}/admin/listings`);
+      let data = res.data;
+      if (data && data.body && typeof data.body === 'string') {
+        data = JSON.parse(data.body);
+      }
       setListings(data);
     } catch (err) {
       console.error(err);
@@ -47,19 +41,10 @@ export default function AdminPage() {
   async function saveListing() {
     const { title, description, location, pricePerNight } = form;
     const { startDate, endDate, quantity } = period;
-    if (
-      !title ||
-      !description ||
-      !location ||
-      !pricePerNight ||
-      !startDate ||
-      !endDate ||
-      quantity < 1
-    ) {
+    if (!title || !description || !location || !pricePerNight || !startDate || !endDate || quantity < 1) {
       alert('Aizpildiet visus laukus');
       return;
     }
-
     const payload = {
       title,
       description,
@@ -85,12 +70,7 @@ export default function AdminPage() {
   }
 
   function resetForm() {
-    setForm({
-      title: '',
-      description: '',
-      location: '',
-      pricePerNight: ''
-    });
+    setForm({ title: '', description: '', location: '', pricePerNight: '' });
     setPeriod({ startDate: null, endDate: null, quantity: 1 });
     setEditingId(null);
   }
@@ -102,8 +82,7 @@ export default function AdminPage() {
       location: listing.location,
       pricePerNight: String(listing.pricePerNight)
     });
-
-    if (listing.availability?.length) {
+    if (Array.isArray(listing.availability) && listing.availability.length > 0) {
       const p = listing.availability[0];
       setPeriod({
         startDate: new Date(p.startDate),
@@ -111,7 +90,6 @@ export default function AdminPage() {
         quantity: p.quantity
       });
     }
-
     setEditingId(listing._id);
   }
 
@@ -129,11 +107,7 @@ export default function AdminPage() {
   async function deleteAll() {
     if (!window.confirm('Dzēst VISUS sludinājumus?')) return;
     try {
-      await Promise.all(
-        listings.map(l =>
-          axios.delete(`${API_BASE}/admin/listings/${l._id}`)
-        )
-      );
+      await Promise.all(listings.map(l => axios.delete(`${API_BASE}/admin/listings/${l._id}`)));
       fetchListings();
     } catch (err) {
       console.error(err);
@@ -153,86 +127,45 @@ export default function AdminPage() {
         <h2>{editingId ? 'Rediģēt sludinājumu' : 'Pievienot sludinājumu'}</h2>
 
         <div className="field-row">
-          <input
-            name="title"
-            placeholder="Nosaukums"
-            value={form.title}
-            onChange={handleFormChange}
-          />
-          <input
-            name="description"
-            placeholder="Apraksts"
-            value={form.description}
-            onChange={handleFormChange}
-          />
-          <input
-            name="location"
-            placeholder="Atrašanās vieta"
-            value={form.location}
-            onChange={handleFormChange}
-          />
-          <input
-            type="number"
-            name="pricePerNight"
-            placeholder="Cena"
-            value={form.pricePerNight}
-            onChange={handleFormChange}
-          />
+          <input name="title" placeholder="Nosaukums" value={form.title} onChange={handleFormChange} />
+          <input name="description" placeholder="Apraksts" value={form.description} onChange={handleFormChange} />
+          <input name="location" placeholder="Atrašanās vieta" value={form.location} onChange={handleFormChange} />
+          <input type="number" name="pricePerNight" placeholder="Cena" value={form.pricePerNight} onChange={handleFormChange} />
         </div>
 
         <div className="field-row">
-          <input
-            type="number"
-            min="1"
-            value={period.quantity}
-            onChange={e => handlePeriodChange('quantity', Number(e.target.value))}
-            placeholder="Daudzums"
-          />
-          <DatePicker
-            className="field-row-input"
-            selected={period.startDate}
-            onChange={date => handlePeriodChange('startDate', date)}
-            placeholderText="Sākuma datums"
-          />
-          <DatePicker
-            className="field-row-input"
-            selected={period.endDate}
-            onChange={date => handlePeriodChange('endDate', date)}
-            placeholderText="Beigu datums"
-          />
+          <input type="number" min="1" value={period.quantity} onChange={e => handlePeriodChange('quantity', Number(e.target.value))} placeholder="Daudzums" />
+          <DatePicker className="field-row-input" selected={period.startDate} onChange={date => handlePeriodChange('startDate', date)} placeholderText="Sākuma datums" />
+          <DatePicker className="field-row-input" selected={period.endDate} onChange={date => handlePeriodChange('endDate', date)} placeholderText="Beigu datums" />
         </div>
 
         <div className="button-row">
-          <button onClick={saveListing}>
-            {editingId ? 'Saglabāt izmaiņas' : 'Saglabāt sludinājumu'}
-          </button>
+          <button onClick={saveListing}>{editingId ? 'Saglabāt izmaiņas' : 'Saglabāt sludinājumu'}</button>
           {editingId && <button onClick={resetForm}>Atcelt</button>}
         </div>
       </section>
 
       <section>
         <h2>Esošie sludinājumi</h2>
-        <ul className="listing-list">
-          {listings.map(l => (
-            <li key={l._id} className="listing-item">
-              <h3>
-                {l.title} – {l.location}
-              </h3>
-              <p>Cena: {l.pricePerNight}</p>
-              {l.availability?.[0] && (
-                <p>
-                  Periods: {new Date(l.availability[0].startDate).toLocaleDateString()} –{' '}
-                  {new Date(l.availability[0].endDate).toLocaleDateString()}, Daudzums:{' '}
-                  {l.availability[0].quantity}
-                </p>
-              )}
-              <div className="button-row">
-                <button onClick={() => editListing(l)}>Rediģēt</button>
-                <button onClick={() => deleteListing(l._id)}>Dzēst</button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        {Array.isArray(listings) && listings.length > 0 ? (
+          <ul className="listing-list">
+            {listings.map(l => (
+              <li key={l._id} className="listing-item">
+                <h3>{l.title} – {l.location}</h3>
+                <p>Cena: {l.pricePerNight}</p>
+                {l.availability?.[0] && (
+                  <p>Periods: {new Date(l.availability[0].startDate).toLocaleDateString()} – {new Date(l.availability[0].endDate).toLocaleDateString()}, Daudzums: {l.availability[0].quantity}</p>
+                )}
+                <div className="button-row">
+                  <button onClick={() => editListing(l)}>Rediģēt</button>
+                  <button onClick={() => deleteListing(l._id)}>Dzēst</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Nav sludinājumu</p>
+        )}
       </section>
     </div>
   );

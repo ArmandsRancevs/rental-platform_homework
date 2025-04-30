@@ -1,3 +1,4 @@
+// src/pages/BrowsePage.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
@@ -18,8 +19,13 @@ export default function BrowsePage() {
   async function fetchListings() {
     try {
       const res = await axios.get(`${API_BASE}/api/listings`);
-      setOriginalListings(res.data);
-      setListings(res.data);
+      let data = res.data;
+      // Unwrap Netlify Function envelope if needed
+      if (data && data.body && typeof data.body === 'string') {
+        data = JSON.parse(data.body);
+      }
+      setOriginalListings(data);
+      setListings(data);
     } catch (err) {
       console.error('Error fetching listings:', err);
     }
@@ -28,7 +34,11 @@ export default function BrowsePage() {
   async function fetchUser() {
     try {
       const res = await axios.get(`${API_BASE}/api/user1`);
-      setReservation(prev => ({ ...prev, user: res.data._id }));
+      let data = res.data;
+      if (data && data.body && typeof data.body === 'string') {
+        data = JSON.parse(data.body);
+      }
+      setReservation(prev => ({ ...prev, user: data._id }));
     } catch (err) {
       console.error('Error fetching user:', err);
     }
@@ -67,7 +77,6 @@ export default function BrowsePage() {
       };
       console.log('Reservation payload:', payload);
       await axios.post(`${API_BASE}/api/reservations`, payload);
-
       // Refresh listings so updated quantity is reflected
       await fetchListings();
       alert('Rezervācija veikta!');
@@ -114,9 +123,7 @@ export default function BrowsePage() {
         <button type="button" onClick={applyFilters}>Piemērot filtrus</button>
       </div>
 
-      {listings.length === 0 ? (
-        <p>Nav piedāvājumu</p>
-      ) : (
+      {Array.isArray(listings) && listings.length > 0 ? (
         <ul>
           {listings.map(listing => (
             <li key={listing._id}>
@@ -124,7 +131,7 @@ export default function BrowsePage() {
               <p>Cena par nakti: {listing.pricePerNight}</p>
               <p>Pieejamības periodi:</p>
               <ul>
-                {listing.availability.map((period, idx) => (
+                {Array.isArray(listing.availability) && listing.availability.map((period, idx) => (
                   <li key={idx}>
                     <span className="highlight">
                       {formatDate(new Date(period.startDate))} - {formatDate(new Date(period.endDate))}
@@ -143,6 +150,8 @@ export default function BrowsePage() {
             </li>
           ))}
         </ul>
+      ) : (
+        <p>Nav piedāvājumu</p>
       )}
     </div>
   );
