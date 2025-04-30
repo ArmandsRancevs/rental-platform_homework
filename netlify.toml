@@ -1,14 +1,14 @@
-# netlify.toml
+# netlify.toml (at the repo root)
 
 [build]
   base    = "rental-platform-frontend"
-  command = "npm install && npm run build"
   publish = "build"
+  command = "npm install && npm run build"
 
 [functions]
-  directory = "rental-platform-frontend/netlify/functions"
+  # relative to that same base folder
+  directory = "netlify/functions"
 
-# Proxy API/admin calls into your Express function
 [[redirects]]
   from   = "/admin/*"
   to     = "/.netlify/functions/api/admin/:splat"
@@ -21,7 +21,6 @@
   status = 200
   force  = true
 
-# SPA fallback for all other GET requests
 [[redirects]]
   from    = "/*"
   to      = "/index.html"
