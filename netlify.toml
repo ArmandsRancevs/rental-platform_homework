@@ -1,26 +1,27 @@
 [build]
-  # if you want Netlify to install both your root deps and then your frontend:
-  command = "npm install && npm install --prefix rental-platform-frontend && npm run build --prefix rental-platform-frontend"
+  base    = "rental-platform-frontend"
+  command = "npm install && npm run build"
   publish = "rental-platform-frontend/build"
 
 [functions]
-  directory = "netlify/functions"
+  # this is where your single api.js “wrapper” lives
+  directory = "rental-platform-frontend/netlify/functions"
 
-# proxy /admin/* → your Express admin routes
+# proxy /admin/* into your one `api.js` function, preserving the /admin prefix
 [[redirects]]
   from   = "/admin/*"
   to     = "/.netlify/functions/api/admin/:splat"
   status = 200
   force  = true
 
-# proxy /api/* → your Express user routes
+# same for /api/*
 [[redirects]]
   from   = "/api/*"
   to     = "/.netlify/functions/api/api/:splat"
   status = 200
   force  = true
 
-# everything else → your React SPA
+# everything else → your React app
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
