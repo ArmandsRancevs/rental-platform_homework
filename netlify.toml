@@ -8,7 +8,7 @@
 
 [functions]
   # if you’re using serverless functions under rental-platform-frontend/netlify/functions
-  directory = "rental-platform-frontend/netlify/functions"
+  directory = "netlify/functions"
 
 # proxy your API routes through the Functions endpoint:
 [[redirects]]
