@@ -3,9 +3,9 @@
 const express = require('express');
 const router = express.Router();
 
-const Listing = require('../models/Listing');
+const Listing     = require('../models/Listing');
 const Reservation = require('../models/Reservation');
-const User = require('../models/User');
+const User        = require('../models/User');
 
 // GET /api/listings
 router.get('/listings', async (req, res) => {
@@ -23,42 +23,59 @@ router.get('/listings', async (req, res) => {
 router.post('/reservations', async (req, res) => {
   try {
     const { listing: listingId, user: userId, startDate, endDate } = req.body;
-
-    // Validate input
     if (!listingId || !userId || !startDate || !endDate) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    // Parse dates
+    const start = utcMidnight(new Date(startDate));
+    const end   = utcMidnight(new Date(endDate));
 
-    // Check listing existence
+    // Find listing
     const listing = await Listing.findById(listingId);
     if (!listing) {
       return res.status(404).json({ message: 'Sludinājums nav atrasts' });
     }
 
-    // Check availability using day-by-day logic
-    const isAvailable = checkAvailability(listing.availability, start, end);
-    if (!isAvailable) {
-      return res.status(400).json({ message: 'Izvēlētie datumi nav pieejami' });
+    // Build day-by-day intervals
+    const intervals = listing.availability.map(p => ({
+      start: new Date(p.startDate),
+      end:   new Date(p.endDate),
+      quantity: p.quantity
+    }));
+
+    // Check that every day is covered and has quantity > 0
+    let current = new Date(start);
+    while (current <= end) {
+      const cover = intervals.find(i => current >= i.start && current < i.end);
+      if (!cover || cover.quantity < 1) {
+        return res.status(400).json({ message: 'Izvēlētie datumi vai daudzums nav pieejami' });
+      }
+      current.setUTCDate(current.getUTCDate() + 1);
     }
 
-    // Create new reservation
+    // Create reservation
     const totalPrice = calculateTotalPrice(listing.pricePerNight, start, end);
-    const reservation = new Reservation({
-      listing: listingId,
-      user: userId,
-      startDate: start,
-      endDate: end,
-      totalPrice
-    });
+    const reservation = new Reservation({ listing: listingId, user: userId, startDate: start, endDate: end, totalPrice });
     await reservation.save();
+
+    // Decrement quantity for the affected interval(s)
+    // (We'll pull fresh doc to update)
+    for (let i = 0; i < listing.availability.length; i++) {
+      const period = listing.availability[i];
+      const pStart = new Date(period.startDate);
+      const pEnd   = new Date(period.endDate);
+      // If the reservation range overlaps this period, decrement
+      if (start < pEnd && end >= pStart) {
+        listing.availability[i].quantity = period.quantity - 1;
+      }
+    }
+    await listing.save();
 
     res.status(201).json(reservation);
   } catch (err) {
     console.error('Error creating reservation:', err);
-    res.status(400).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -73,45 +90,15 @@ router.get('/user1', async (req, res) => {
   }
 });
 
-// Day-by-day availability check
-function checkAvailability(availabilityPeriods, startDate, endDate) {
-  const intervals = parseIntervals(availabilityPeriods);
+// Helpers
 
-  const startUTC = utcMidnight(startDate);
-  const endUTC = utcMidnight(endDate);
-
-  let current = new Date(startUTC);
-  while (current <= endUTC) {
-    if (!isDayCovered(current, intervals)) {
-      return false;
-    }
-    current.setUTCDate(current.getUTCDate() + 1);
-  }
-  return true;
-}
-
-// Parse availability intervals from DB as [start, end) intervals
-function parseIntervals(intervals) {
-  return intervals.map(p => ({
-    start: new Date(p.startDate),
-    end: new Date(p.endDate) // end is exclusive
-  }));
-}
-
-// Check if a specific day is covered by any interval
-function isDayCovered(day, intervals) {
-  return intervals.some(interval => day >= interval.start && day < interval.end);
-}
-
-// Ensure we get midnight UTC date
 function utcMidnight(date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
-// Calculate total price based on days
 function calculateTotalPrice(pricePerNight, startDate, endDate) {
-  const timeDiff = Math.abs(endDate - startDate);
-  const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const diffDays = Math.ceil((endDate - startDate + 1 * msPerDay) / msPerDay);
   return pricePerNight * diffDays;
 }
 

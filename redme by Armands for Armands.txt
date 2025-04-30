@@ -1,5 +1,5 @@
-Palaist node.js -> cd "C:\rental_platfrom_a"; node server.js
-Palaist npm: -> cd "C:\rental_platfrom_a\rental-platform-frontend"; npm start
+Palaist node.js -> cd "C:\rental_platfrom_homework"; node server.js
+Palaist npm: -> cd "C:\rental_platfrom_homework\rental-platform-frontend"; npm start
 
 git add .
 git commit -m "Commit message"
