@@ -1,28 +1,33 @@
+# netlify.toml
 [build]
-  # first installs root deps, then builds your React app
-  command   = "npm install && npm run build-client"
-  publish   = "rental-platform-frontend/build"
+  # from repo root, first install your functions’ deps, then install & build the React app
+  command = """
+    npm install && \
+    npm install --prefix rental-platform-frontend && \
+    npm run build --prefix rental-platform-frontend
+  """
+  # where CRA will emit its production files
+  publish = "rental-platform-frontend/build"
 
 [functions]
-  # where our single api.js lives
+  # point at the functions folder at the repo root
   directory = "netlify/functions"
 
-# any /admin/* → function at /.netlify/functions/api/admin/...
+# proxy your Express routes through the Functions endpoint
 [[redirects]]
-  from    = "/admin/*"
-  to      = "/.netlify/functions/api/admin/:splat"
-  status  = 200
-  force   = true
+  from     = "/admin/*"
+  to       = "/.netlify/functions/api/admin/:splat"
+  status   = 200
+  force    = true
 
-# any /api/* → function at /.netlify/functions/api/api/...
 [[redirects]]
-  from    = "/api/*"
-  to      = "/.netlify/functions/api/api/:splat"
-  status  = 200
-  force   = true
+  from     = "/api/*"
+  to       = "/.netlify/functions/api/api/:splat"
+  status   = 200
+  force    = true
 
-# push everything else into your SPA:
+# everything else → your frontend’s client-side router
 [[redirects]]
-  from    = "/*"
-  to      = "/index.html"
-  status  = 200
+  from     = "/*"
+  to       = "/index.html"
+  status   = 200
