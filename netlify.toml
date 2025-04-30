@@ -1,30 +1,26 @@
-# netlify.toml
-
 [build]
-  ## run both back- and front-end installs, then build the React app
-  base    = "."  
+  # if you want Netlify to install both your root deps and then your frontend:
   command = "npm install && npm install --prefix rental-platform-frontend && npm run build --prefix rental-platform-frontend"
   publish = "rental-platform-frontend/build"
 
 [functions]
-  ## point at your Netlify Functions folder
   directory = "netlify/functions"
 
-# Proxy any /admin/* → your serverless‐wrapped Express
+# proxy /admin/* → your Express admin routes
 [[redirects]]
   from   = "/admin/*"
   to     = "/.netlify/functions/api/admin/:splat"
   status = 200
   force  = true
 
-# Proxy any /api/* → your serverless‐wrapped Express
+# proxy /api/* → your Express user routes
 [[redirects]]
   from   = "/api/*"
   to     = "/.netlify/functions/api/api/:splat"
   status = 200
   force  = true
 
-# Everything else → serve index.html (React Router)
+# everything else → your React SPA
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
