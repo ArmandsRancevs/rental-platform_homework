@@ -1,12 +1,9 @@
-// src/pages/BrowsePage.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { toUTCISODate, formatDate } from '../utils/date.js';
-
-const API_BASE = 'http://localhost:5000';
+import { API_BASE } from '../config';
 
 export default function BrowsePage() {
   const [originalListings, setOriginalListings] = useState([]);
@@ -37,7 +34,6 @@ export default function BrowsePage() {
     }
   }
 
-  // Checks availability, quantity >0, and that user is set
   function canReserve(listing) {
     const { startDate, endDate, user } = reservation;
     if (!user || !startDate || !endDate) return false;
@@ -57,9 +53,7 @@ export default function BrowsePage() {
 
   async function handleReservation(listingId) {
     const { startDate, endDate, user } = reservation;
-    if (!user) {
-      await fetchUser();
-    }
+    if (!user) await fetchUser();
     if (!startDate || !endDate) {
       alert('Lūdzu, izvēlieties sākuma un beigu datumu.');
       return;
@@ -74,7 +68,7 @@ export default function BrowsePage() {
       console.log('Reservation payload:', payload);
       await axios.post(`${API_BASE}/api/reservations`, payload);
 
-      // Refresh listings from server so quantity is accurate
+      // Refresh listings so updated quantity is reflected
       await fetchListings();
       alert('Rezervācija veikta!');
     } catch (err) {

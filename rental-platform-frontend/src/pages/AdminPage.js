@@ -4,13 +4,21 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
-const API_BASE = 'http://localhost:5000';
+import { API_BASE } from '../config';
 
 export default function AdminPage() {
   const [listings, setListings] = useState([]);
-  const [form, setForm] = useState({ title: '', description: '', location: '', pricePerNight: '' });
-  const [period, setPeriod] = useState({ startDate: null, endDate: null, quantity: 1 });
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    location: '',
+    pricePerNight: ''
+  });
+  const [period, setPeriod] = useState({
+    startDate: null,
+    endDate: null,
+    quantity: 1
+  });
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -21,8 +29,8 @@ export default function AdminPage() {
     try {
       const { data } = await axios.get(`${API_BASE}/admin/listings`);
       setListings(data);
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       alert('Neizdevās ielādēt sludinājumus');
     }
   }
@@ -39,15 +47,27 @@ export default function AdminPage() {
   async function saveListing() {
     const { title, description, location, pricePerNight } = form;
     const { startDate, endDate, quantity } = period;
-    if (!title || !description || !location || !pricePerNight || !startDate || !endDate || quantity < 1) {
+    if (
+      !title ||
+      !description ||
+      !location ||
+      !pricePerNight ||
+      !startDate ||
+      !endDate ||
+      quantity < 1
+    ) {
       alert('Aizpildiet visus laukus');
       return;
     }
+
     const payload = {
-      ...form,
+      title,
+      description,
+      location,
       pricePerNight: Number(pricePerNight),
       availability: [{ startDate, endDate, quantity }]
     };
+
     try {
       if (editingId) {
         await axios.put(`${API_BASE}/admin/listings/${editingId}`, payload);
@@ -58,14 +78,19 @@ export default function AdminPage() {
       }
       resetForm();
       fetchListings();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       alert('Neizdevās saglabāt sludinājumu');
     }
   }
 
   function resetForm() {
-    setForm({ title: '', description: '', location: '', pricePerNight: '' });
+    setForm({
+      title: '',
+      description: '',
+      location: '',
+      pricePerNight: ''
+    });
     setPeriod({ startDate: null, endDate: null, quantity: 1 });
     setEditingId(null);
   }
@@ -77,6 +102,7 @@ export default function AdminPage() {
       location: listing.location,
       pricePerNight: String(listing.pricePerNight)
     });
+
     if (listing.availability?.length) {
       const p = listing.availability[0];
       setPeriod({
@@ -85,6 +111,7 @@ export default function AdminPage() {
         quantity: p.quantity
       });
     }
+
     setEditingId(listing._id);
   }
 
@@ -93,8 +120,8 @@ export default function AdminPage() {
     try {
       await axios.delete(`${API_BASE}/admin/listings/${id}`);
       fetchListings();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       alert('Neizdevās dzēst sludinājumu');
     }
   }
@@ -102,10 +129,14 @@ export default function AdminPage() {
   async function deleteAll() {
     if (!window.confirm('Dzēst VISUS sludinājumus?')) return;
     try {
-      await Promise.all(listings.map(l => axios.delete(`${API_BASE}/admin/listings/${l._id}`)));
+      await Promise.all(
+        listings.map(l =>
+          axios.delete(`${API_BASE}/admin/listings/${l._id}`)
+        )
+      );
       fetchListings();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       alert('Neizdevās dzēst visus sludinājumus');
     }
   }
@@ -113,16 +144,33 @@ export default function AdminPage() {
   return (
     <div className="container">
       <h1>Admin lapa</h1>
+
       <div className="button-row">
         <button onClick={deleteAll}>Dzēst visus</button>
       </div>
 
       <section>
         <h2>{editingId ? 'Rediģēt sludinājumu' : 'Pievienot sludinājumu'}</h2>
+
         <div className="field-row">
-          <input name="title" placeholder="Nosaukums" value={form.title} onChange={handleFormChange} />
-          <input name="description" placeholder="Apraksts" value={form.description} onChange={handleFormChange} />
-          <input name="location" placeholder="Atrašanās vieta" value={form.location} onChange={handleFormChange} />
+          <input
+            name="title"
+            placeholder="Nosaukums"
+            value={form.title}
+            onChange={handleFormChange}
+          />
+          <input
+            name="description"
+            placeholder="Apraksts"
+            value={form.description}
+            onChange={handleFormChange}
+          />
+          <input
+            name="location"
+            placeholder="Atrašanās vieta"
+            value={form.location}
+            onChange={handleFormChange}
+          />
           <input
             type="number"
             name="pricePerNight"
@@ -131,6 +179,7 @@ export default function AdminPage() {
             onChange={handleFormChange}
           />
         </div>
+
         <div className="field-row">
           <input
             type="number"
@@ -152,8 +201,11 @@ export default function AdminPage() {
             placeholderText="Beigu datums"
           />
         </div>
+
         <div className="button-row">
-          <button onClick={saveListing}>{editingId ? 'Saglabāt izmaiņas' : 'Saglabāt sludinājumu'}</button>
+          <button onClick={saveListing}>
+            {editingId ? 'Saglabāt izmaiņas' : 'Saglabāt sludinājumu'}
+          </button>
           {editingId && <button onClick={resetForm}>Atcelt</button>}
         </div>
       </section>
@@ -163,11 +215,15 @@ export default function AdminPage() {
         <ul className="listing-list">
           {listings.map(l => (
             <li key={l._id} className="listing-item">
-              <h3>{l.title} - {l.location}</h3>
+              <h3>
+                {l.title} – {l.location}
+              </h3>
               <p>Cena: {l.pricePerNight}</p>
               {l.availability?.[0] && (
                 <p>
-                  Periods: {new Date(l.availability[0].startDate).toLocaleDateString()} - {new Date(l.availability[0].endDate).toLocaleDateString()}, Daudzums: {l.availability[0].quantity}
+                  Periods: {new Date(l.availability[0].startDate).toLocaleDateString()} –{' '}
+                  {new Date(l.availability[0].endDate).toLocaleDateString()}, Daudzums:{' '}
+                  {l.availability[0].quantity}
                 </p>
               )}
               <div className="button-row">

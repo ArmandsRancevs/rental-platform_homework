@@ -1,0 +1,13 @@
+[build]
+  functions = "netlify/functions"
+  publish   = "rental-platform-frontend/build"
+
+[[redirects]]
+  from = "/admin/*"
+  to   = "/.netlify/functions/api/admin/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/*"
+  to   = "/.netlify/functions/api/api/:splat"
+  status = 200
