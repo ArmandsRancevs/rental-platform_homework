@@ -8,19 +8,20 @@
 [functions]
   directory = "rental-platform-frontend/netlify/functions"
 
-# 1 Proxy all /admin/* calls into your Express function
+# Proxy API/admin calls into your Express function
 [[redirects]]
   from   = "/admin/*"
   to     = "/.netlify/functions/api/admin/:splat"
   status = 200
+  force  = true
 
-# 2 Proxy all /api/* calls into your Express function
 [[redirects]]
   from   = "/api/*"
   to     = "/.netlify/functions/api/api/:splat"
   status = 200
+  force  = true
 
-# 3 Only GET requests for anything else fall back to index.html
+# SPA fallback for all other GET requests
 [[redirects]]
   from    = "/*"
   to      = "/index.html"
