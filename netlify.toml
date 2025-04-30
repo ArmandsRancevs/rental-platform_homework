@@ -1,11 +1,11 @@
 [build]
   base    = "rental-platform-frontend"
   command = "npm install && npm run build"
-  publish = "rental-platform-frontend/build"
+  publish = "build"
 
 [functions]
   # this is where your single api.js “wrapper” lives
-  directory = "rental-platform-frontend/netlify/functions"
+  directory = "netlify/functions"
 
 # proxy /admin/* into your one `api.js` function, preserving the /admin prefix
 [[redirects]]
