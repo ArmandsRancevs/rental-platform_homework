@@ -1,0 +1,41 @@
+/* frontend/src/App.css */
+.app-header {
+  background-color: #282c34;
+  padding: 10px;
+  color: white;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+}
+
+.nav-list li a {
+  color: white;
+  text-decoration: none;
+}
+
+.container {
+  padding: 20px;
+}
+
+.date-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.field-row-input {
+  padding: 5px;
+}
+
+.highlight {
+  font-weight: bold;
+}
+
+.button-row {
+  display: flex;
+  gap: 5px;
+}

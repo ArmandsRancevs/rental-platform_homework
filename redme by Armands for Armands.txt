@@ -1,6 +1,0 @@
-Palaist node.js -> cd "C:\rental_platfrom_homework"; node server.js
-Palaist npm: -> cd "C:\rental_platfrom_homework\rental-platform-frontend"; npm start
-
-git add .
-git commit -m "Commit message"
-git push

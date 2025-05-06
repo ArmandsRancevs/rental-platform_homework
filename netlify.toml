@@ -1,26 +1,16 @@
-# netlify.toml
-
 [build]
-  base    = "rental-platform-frontend"       # where your React app lives
-  publish = "build"                          # React’s output folder
-  command = "npm install && npm run build"   # runs in rental-platform-frontend
-
-[functions]
-  directory = "netlify/functions"            # where your api.js lives (relative to repo root)
+  publish = "frontend/build"
+  functions = "backend"
 
 [[redirects]]
-  from    = "/admin/*"
-  to      = "/.netlify/functions/api/admin/:splat"
-  status  = 200
-  force   = true
-
+  from = "/api/*"
+  to = "/api/:splat"
+  status = 200
 [[redirects]]
-  from    = "/api/*"
-  to      = "/.netlify/functions/api/api/:splat"
-  status  = 200
-  force   = true
-
+  from = "/admin/*"
+  to = "/admin/:splat"
+  status = 200
 [[redirects]]
-  from    = "/*"
-  to      = "/index.html"
-  status  = 200
+  from = "/*"
+  to = "/index.html"
+  status = 200
