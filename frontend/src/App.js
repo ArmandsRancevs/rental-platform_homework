@@ -11,7 +11,7 @@ export default function App() {
       <header className="app-header">
         <nav>
           <ul className="nav-list">
-            <li><Link to="/browse">Browse Listings</Link></li>
+            <li><Link to="/browse">Browse Products</Link></li>
             <li><Link to="/admin">Admin Panel</Link></li>
           </ul>
         </nav>

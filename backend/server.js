@@ -26,7 +26,7 @@ async function startServer() {
   // 3) mount routers
   app.use("/admin", require("./routes/admin"));
   app.use("/api/users", require("./routes/user"));
-  app.use("/api/listings", require("./routes/listings"));
+  app.use("/api/products", require("./routes/products"));
   app.use("/api/reservations", require("./routes/reservations"));
 
   // 4) health-check
@@ -41,7 +41,6 @@ async function startServer() {
   return app;
 }
 
-// start the server
 startServer().catch((err) => {
   console.error("Failed to start server:", err);
   process.exit(1);

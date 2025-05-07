@@ -1,4 +1,4 @@
-// backend/models/Listing.js
+// backend/models/Product.js
 const mongoose = require('mongoose');
 
 const availabilitySchema = new mongoose.Schema({
@@ -7,7 +7,7 @@ const availabilitySchema = new mongoose.Schema({
   quantity: { type: Number, required: true }
 }, { _id: false });
 
-const listingSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
   location: { type: String },
@@ -15,4 +15,4 @@ const listingSchema = new mongoose.Schema({
   availability: { type: [availabilitySchema], default: [] }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Listing', listingSchema);
+module.exports = mongoose.model('Product', productSchema);
